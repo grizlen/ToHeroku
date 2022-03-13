@@ -1,4 +1,4 @@
-package ru.griz.main;
+package ru.griz.main.entities;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -6,14 +6,16 @@ import lombok.Setter;
 
 import javax.persistence.*;
 
+@Entity
+@Table(name = "doc_sale_items")
 @Getter
 @Setter
 @NoArgsConstructor
-@Entity
-@Table(name = "hello")
-public class Hello {
+public class SaleItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String text;
+    Long id;
+    Long docId;
+    Long productId;
+    Integer count;
 }
