@@ -43,7 +43,7 @@ public class DocumentsController {
     }
 
     @PostMapping("/buy/")
-    public DocBuyDTO postDocBuy(DocBuyDTO doc) {
+    public DocBuyDTO postDocBuy(@RequestBody DocBuyDTO doc) {
         return documentsService.saveDocBuy(doc);
     }
 
