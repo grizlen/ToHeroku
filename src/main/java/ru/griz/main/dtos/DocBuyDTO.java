@@ -8,7 +8,7 @@ import java.util.List;
 
 public class DocBuyDTO {
     private Long id;
-    private Date date;
+    private String date;
     private List<BuyItem> items = new ArrayList<>();
 
     public void setId(Long id) {
@@ -19,11 +19,11 @@ public class DocBuyDTO {
         return id;
     }
 
-    public void setDate(Date date) {
+    public void setDate(String date) {
         this.date = date;
     }
 
-    public Date getDate() {
+    public String getDate() {
         return date;
     }
 

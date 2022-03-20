@@ -8,6 +8,9 @@ import ru.griz.main.entities.*;
 import ru.griz.main.exceptions.ResourceNotFoundException;
 import ru.griz.main.repositories.*;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -55,12 +58,20 @@ public class DocumentsService {
     public DocBuyDTO saveDocBuy(DocBuyDTO doc) {
         log.info("POST: id: {} date {}", doc.getId(), doc.getDate());
         BuyHeader header = new BuyHeader();
+        header.setId(doc.getId());
+        try {
+            header.setDate(new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").parse(doc.getDate()));
+        } catch (ParseException e) {
+            e.printStackTrace();
+            header.setDate(new Date());
+        }
         header = buyRepository.save(header);
         Long id = header.getId();
 
         DocBuyDTO result = new DocBuyDTO();
         result.setId(id);
-        result.setDate(header.getDate());
+        result.setDate(doc.getDate());
+//        result.setDate(header.getDate());
 
         if (doc.getId() != null) {
             buyItemRepository.deleteAllByDocId(doc.getId());
