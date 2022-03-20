@@ -2,6 +2,7 @@ package ru.griz.main.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.griz.main.dtos.DocBuyDTO;
 import ru.griz.main.entities.*;
 import ru.griz.main.exceptions.ResourceNotFoundException;
 import ru.griz.main.repositories.*;
@@ -47,6 +48,27 @@ public class DocumentsService {
 
     public List<BuyItem> getDocBuyItems(long docId) {
         return buyItemRepository.findAllByDocId(docId);
+    }
+
+    public DocBuyDTO saveDocBuy(DocBuyDTO doc) {
+        BuyHeader header = new BuyHeader();
+        header = buyRepository.save(header);
+        Long id = header.getId();
+
+        DocBuyDTO result = new DocBuyDTO();
+        result.setId(id);
+        result.setDate(header.getDate());
+
+        if (doc.getId() != null) {
+            buyItemRepository.deleteAllByDocId(doc.getId());
+        }
+        doc.getItems().forEach(i -> {
+            i.setDocId(id);
+            result.getItems().add(i);
+        });
+        List<BuyItem> resultItems = buyItemRepository.saveAll(result.getItems());
+        result.setItems(resultItems);
+        return null;
     }
 
     // Отгрузки

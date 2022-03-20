@@ -1,10 +1,8 @@
 package ru.griz.main.controllers;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import ru.griz.main.dtos.DocBuyDTO;
 import ru.griz.main.entities.*;
 import ru.griz.main.services.DocumentsService;
 
@@ -28,12 +26,12 @@ public class DocumentsController {
         return documentsService.getByIdDoc(id);
     }
 
+    // Поступления
     @GetMapping("/buy/")
     public List<BuyHeader> getAllDocBuys() {
         return documentsService.getAllDocBuys();
     }
 
-    // Поступления
     @GetMapping("/buy/{id}")
     public BuyHeader getByIdDocBuy(@PathVariable Long id) {
         return documentsService.getByIdDocBuy(id);
@@ -42,6 +40,11 @@ public class DocumentsController {
     @GetMapping("/buy/items/{docId}")
     public List<BuyItem> getDocBuyItems(@PathVariable long docId) {
         return documentsService.getDocBuyItems(docId);
+    }
+
+    @PostMapping("/buy/")
+    public DocBuyDTO postDocBuy(DocBuyDTO doc) {
+        return documentsService.saveDocBuy(doc);
     }
 
     // Отгрузки
