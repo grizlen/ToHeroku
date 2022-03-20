@@ -1,6 +1,7 @@
 package ru.griz.main.services;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.griz.main.dtos.DocBuyDTO;
 import ru.griz.main.entities.*;
@@ -12,6 +13,7 @@ import java.util.function.Supplier;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DocumentsService {
 
     private final DocumentsRepository documentsRepository;
@@ -51,6 +53,7 @@ public class DocumentsService {
     }
 
     public DocBuyDTO saveDocBuy(DocBuyDTO doc) {
+        log.info("POST: id: {} date {}", doc.getId(), doc.getDate());
         BuyHeader header = new BuyHeader();
         header = buyRepository.save(header);
         Long id = header.getId();
