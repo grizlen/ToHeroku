@@ -57,8 +57,12 @@ public class DocumentsService {
 
     public DocBuyDTO saveDocBuy(DocBuyDTO doc) {
         log.info("POST: id: {} date {}", doc.getId(), doc.getDate());
+        Document document = new Document();
+        document.setId(doc.getId());
+        document.setType("BUY");
+        document = documentsRepository.save(document);
         BuyHeader header = new BuyHeader();
-        header.setId(doc.getId());
+        header.setId(document.getId());
         try {
             header.setDate(new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").parse(doc.getDate()));
         } catch (ParseException e) {
