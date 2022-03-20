@@ -60,6 +60,7 @@ public class DocumentsService {
         Document document = new Document();
         document.setId(doc.getId());
         document.setType("BUY");
+        log.info("save document: id: {}", document.getId());
         document = documentsRepository.save(document);
         BuyHeader header = new BuyHeader();
         header.setId(document.getId());
@@ -67,8 +68,8 @@ public class DocumentsService {
             header.setDate(new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").parse(doc.getDate()));
         } catch (ParseException e) {
             e.printStackTrace();
-            header.setDate(new Date());
         }
+        log.info("save header: id: {} date {}", header.getId(), header.getDate());
         header = buyRepository.save(header);
         Long id = header.getId();
 
@@ -86,7 +87,8 @@ public class DocumentsService {
         });
         List<BuyItem> resultItems = buyItemRepository.saveAll(result.getItems());
         result.setItems(resultItems);
-        return null;
+        log.info("POST return: id: {} date {}", result.getId(), result.getDate());
+        return result;
     }
 
     // Отгрузки
