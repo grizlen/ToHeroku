@@ -42,6 +42,11 @@ public class DocumentsController {
         return documentsService.getDocBuyItems(docId);
     }
 
+    @GetMapping("/buy/dto/{id}")
+    public DocBuyDTO getDocBuyDto(@PathVariable long id) {
+        return documentsService.getDocBuyDTO(id);
+    }
+
     @PostMapping("/buy/")
     public DocBuyDTO postDocBuy(@RequestBody DocBuyDTO doc) {
         return documentsService.saveDocBuy(doc);

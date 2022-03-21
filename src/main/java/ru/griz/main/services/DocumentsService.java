@@ -10,7 +10,6 @@ import ru.griz.main.repositories.*;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -26,6 +25,7 @@ public class DocumentsService {
     private final SaleItemRepository saleItemRepository;
     private final ReturnRepository returnRepository;
     private final ReturnItemRepository returnItemRepository;
+    private final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
     private Supplier<ResourceNotFoundException> documentNotFound(Long id) {
         return () -> new ResourceNotFoundException("Document: " + id + " not found");
@@ -55,6 +55,16 @@ public class DocumentsService {
         return buyItemRepository.findAllByDocId(docId);
     }
 
+    public DocBuyDTO getDocBuyDTO(long id) {
+        BuyHeader header = buyRepository.findById(id)
+                .orElse(new BuyHeader());
+        DocBuyDTO result = new DocBuyDTO();
+        result.setId(header.getId());
+        result.setDate(dateFormatter.format(header.getDate()));
+        result.setItems(getDocBuyItems(id));
+        return result;
+    }
+
     public DocBuyDTO saveDocBuy(DocBuyDTO doc) {
         log.info("POST: id: {} date {}", doc.getId(), doc.getDate());
         Document document = new Document();
@@ -65,7 +75,7 @@ public class DocumentsService {
         BuyHeader header = new BuyHeader();
         header.setId(document.getId());
         try {
-            header.setDate(new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").parse(doc.getDate()));
+            header.setDate(dateFormatter.parse(doc.getDate()));
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -76,7 +86,6 @@ public class DocumentsService {
         DocBuyDTO result = new DocBuyDTO();
         result.setId(id);
         result.setDate(doc.getDate());
-//        result.setDate(header.getDate());
 
         if (doc.getId() != null) {
             buyItemRepository.deleteAllByDocId(doc.getId());
@@ -118,4 +127,5 @@ public class DocumentsService {
     public List<ReturnItem> getDocReturnItems(long docId) {
         return returnItemRepository.findAllByDocId(docId);
     }
+
 }
