@@ -17,5 +17,6 @@ public class BuyItem {
     Long id;
     Long docId;
     Long productId;
+    String productName;
     Integer count;
 }
