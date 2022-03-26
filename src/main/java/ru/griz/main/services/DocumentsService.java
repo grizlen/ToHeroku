@@ -3,15 +3,15 @@ package ru.griz.main.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.griz.main.dtos.DocBuyDTO;
 import ru.griz.main.entities.*;
 import ru.griz.main.exceptions.ResourceNotFoundException;
 import ru.griz.main.repositories.*;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +25,7 @@ public class DocumentsService {
     private final SaleItemRepository saleItemRepository;
     private final ReturnRepository returnRepository;
     private final ReturnItemRepository returnItemRepository;
-    private final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+    private final ProductService productService;
 
     private Supplier<ResourceNotFoundException> documentNotFound(Long id) {
         return () -> new ResourceNotFoundException("Document: " + id + " not found");
@@ -46,58 +46,59 @@ public class DocumentsService {
         return buyRepository.findAll();
     }
 
-    public BuyHeader getByIdDocBuy(Long id) {
-        return buyRepository.findById(id)
-                .orElseThrow(documentNotFound(id));
-    }
-
-    public List<BuyItem> getDocBuyItems(long docId) {
-        return buyItemRepository.findAllByDocId(docId);
-    }
-
-    public DocBuyDTO getDocBuyDTO(long id) {
+    public DocBuyDTO getByIdDocBuy(Long id) {
         BuyHeader header = buyRepository.findById(id)
-                .orElse(new BuyHeader());
-        DocBuyDTO result = new DocBuyDTO();
-        result.setId(header.getId());
-        result.setDate(dateFormatter.format(header.getDate()));
-        result.setItems(getDocBuyItems(id));
-        return result;
+                .orElseThrow(documentNotFound(id));
+        return DocBuyDTO.builder()
+                .id(header.getId())
+                .date(header.getDate())
+                .items(
+                        getDocBuyItems(header.getId()).stream()
+                                .map(item ->
+                                        DocBuyDTO.itemBuilder()
+                                                .productId(item.getProductId())
+                                                .productName(productService.getById(item.getProductId()).getName())
+                                                .count(item.getCount())
+                                                .build()
+                                )
+                                .collect(Collectors.toList())
+                )
+                .build();
     }
 
+    @Transactional
     public DocBuyDTO saveDocBuy(DocBuyDTO doc) {
-        log.info("POST: id: {} date {}", doc.getId(), doc.getDate());
+        if (doc.getId() != null) {
+            buyItemRepository.deleteByDocId(doc.getId());
+        }
         Document document = new Document();
         document.setId(doc.getId());
         document.setType("BUY");
-        log.info("save document: id: {}", document.getId());
         document = documentsRepository.save(document);
+
+        Long docId = document.getId();
+
         BuyHeader header = new BuyHeader();
-        header.setId(document.getId());
-        try {
-            header.setDate(dateFormatter.parse(doc.getDate()));
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        log.info("save header: id: {} date {}", header.getId(), header.getDate());
-        header = buyRepository.save(header);
-        Long id = header.getId();
+        header.setId(docId);
+        header.setDate(doc.getDate());
+        buyRepository.save(header);
 
-        DocBuyDTO result = new DocBuyDTO();
-        result.setId(id);
-        result.setDate(doc.getDate());
+        List<BuyItem> buyItems = doc.getItems().stream()
+                .map(i -> {
+                    BuyItem item = new BuyItem();
+                    item.setDocId(docId);
+                    item.setId(null);
+                    item.setProductId(i.getProductId());
+                    item.setCount(i.getCount());
+                    return item;
+                })
+                .collect(Collectors.toList());
+        buyItemRepository.saveAll(buyItems);
 
-        if (doc.getId() != null) {
-            buyItemRepository.deleteAllByDocId(doc.getId());
-        }
-        doc.getItems().forEach(i -> {
-            i.setDocId(id);
-            result.getItems().add(i);
-        });
-        List<BuyItem> resultItems = buyItemRepository.saveAll(result.getItems());
-        result.setItems(resultItems);
-        log.info("POST return: id: {} date {}", result.getId(), result.getDate());
-        return result;
+        return getByIdDocBuy(docId);
+    }
+    public List<BuyItem> getDocBuyItems(long docId) {
+        return buyItemRepository.findAllByDocId(docId);
     }
 
     // Отгрузки
@@ -127,5 +128,4 @@ public class DocumentsService {
     public List<ReturnItem> getDocReturnItems(long docId) {
         return returnItemRepository.findAllByDocId(docId);
     }
-
 }

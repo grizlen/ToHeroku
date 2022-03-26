@@ -33,23 +33,18 @@ public class DocumentsController {
     }
 
     @GetMapping("/buy/{id}")
-    public BuyHeader getByIdDocBuy(@PathVariable Long id) {
+    public DocBuyDTO getByIdDocBuy(@PathVariable Long id) {
         return documentsService.getByIdDocBuy(id);
-    }
-
-    @GetMapping("/buy/items/{docId}")
-    public List<BuyItem> getDocBuyItems(@PathVariable long docId) {
-        return documentsService.getDocBuyItems(docId);
-    }
-
-    @GetMapping("/buy/dto/{id}")
-    public DocBuyDTO getDocBuyDto(@PathVariable long id) {
-        return documentsService.getDocBuyDTO(id);
     }
 
     @PostMapping("/buy/")
     public DocBuyDTO postDocBuy(@RequestBody DocBuyDTO doc) {
         return documentsService.saveDocBuy(doc);
+    }
+
+    @GetMapping("/buy/items/{docId}")
+    public List<BuyItem> getDocBuyItems(@PathVariable long docId) {
+        return documentsService.getDocBuyItems(docId);
     }
 
     // Отгрузки
@@ -83,5 +78,4 @@ public class DocumentsController {
     public List<ReturnItem> getDocReturnItems(@PathVariable long docId) {
         return documentsService.getDocReturnItems(docId);
     }
-
 }
